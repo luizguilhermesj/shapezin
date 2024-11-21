@@ -51,11 +51,3 @@ export class PathNode {
     space.add(this.object);
   }
 }
-
-// new THREE.Mesh(
-//   new THREE.SphereGeometry(0.4, 32, 32),
-//   new THREE.MeshBasicMaterial({
-//     wireframe: false,
-//     color: 0xffff00,
-//   })
-// );

@@ -5,6 +5,7 @@ import { PathNode } from './PathNode';
 import { Space } from './Space';
 import { MTLLoader, OBJLoader } from 'three/examples/jsm/Addons.js';
 import { Source } from './Source';
+import { ShapeCircle } from './ShapeCircle';
 
 const renderer = new THREE.WebGLRenderer();
 
@@ -37,7 +38,10 @@ const vortexMesh = new THREE.Mesh(
 space.add(vortexMesh);
 
 
-const source = new Source(new THREE.Vector3(3,0,3))
+const source = new Source(
+  scene,
+  new THREE.Vector3(3, 0, 3)
+);
 space.add(source.object);
 
 
@@ -55,11 +59,6 @@ window.addEventListener('mousemove', function (e) {
     if (intersects.length > 0) {
         const intersect = intersects[0];
         const highlightPos = new THREE.Vector3().copy(intersect.point).floor().addScalar(0.5);
-        // let x = highlightPos.x - (highlightPos.x % 5)
-        // let z = highlightPos.z - (highlightPos.z % 5)
-
-        // x = x > 0 ? x + 2.5 : x - 2.5
-        // z = z > 0 ? z + 2.5 : z - 2.5
         sector.highlightMesh.position.set(highlightPos.x, 0, highlightPos.z);
         if (space.isAvailable(sector.highlightMesh.position))
           sector.highlightMesh.material.color.setHex(0xff0000);
@@ -89,6 +88,15 @@ const handleMouseDown = () => {
 
 }
 
+const handleSources = (time) => {
+    for (const shape of source.shapes) {
+      shape.move(new THREE.Vector3(0, 0, 2 / 1000))
+      // object.position.x += 2 / 1000;
+      // object.rotation.z = time / 1000;
+      // object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
+    };
+}
+
 const animate: XRFrameRequestCallback = (time) => {
 //   for (const pos in objects) {
 //     const object = objects[pos]
@@ -96,6 +104,8 @@ const animate: XRFrameRequestCallback = (time) => {
 //     object.rotation.z = time / 1000;
 //     object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));
 //   };
+
+  handleSources(time);
 
   handleMouseDown();
   handleKeyDown();
