@@ -6,6 +6,7 @@ import { Space } from './Space';
 import { MTLLoader, OBJLoader } from 'three/examples/jsm/Addons.js';
 import { Source } from './Source';
 import { ShapeCircle } from './ShapeCircle';
+import { Vortex } from './Vortex';
 
 const renderer = new THREE.WebGLRenderer();
 
@@ -27,23 +28,16 @@ const sector = new Sector();
 sectors.push(sector);
 sector.addToScene(scene)
 
-
-const vortexMesh = new THREE.Mesh(
-  new THREE.BoxGeometry(1, 1, 1),
-  new THREE.MeshBasicMaterial({
-    wireframe: false,
-    color: 0xff00ff,
-  })
-);
-space.add(vortexMesh);
-
-
+const vortex = new Vortex(
+  scene,
+  new THREE.Vector3(0,0,0)
+)
+space.add(vortex)
 const source = new Source(
   scene,
   new THREE.Vector3(3, 0, 3)
 );
-space.add(source.object);
-
+space.add(source);
 
 const mousePosition = new THREE.Vector2();
 const raycaster = new THREE.Raycaster();
@@ -68,29 +62,30 @@ window.addEventListener('mousemove', function (e) {
 
 
 let mouseDown = false;
-window.addEventListener('mousedown', function () {
-    mouseDown = true
-});
-window.addEventListener('mouseup', function () {
-    mouseDown = false
-});
+window.addEventListener("mousedown", () => (mouseDown = true));
+window.addEventListener("mouseup", () => (mouseDown = false));
+
+let nodes: PathNode[] = []
 const handleMouseDown = () => {
     if (!mouseDown) return
     if (space.isAvailable(sector.highlightMesh.position))
       return;
 
     if (intersects.length > 0) {
-        const pathNode = new PathNode(space, sector.highlightMesh.position);
+        const pathNode = new PathNode(space, sector.highlightMesh.position.clone());
         
-        scene.add(pathNode.object);
+        nodes.push(pathNode)
+        // pathNode.object.rotateY((Math.PI / 180) * 90);
+        space.add(pathNode);
         sector.highlightMesh.material.color.setHex(0xFF0000);
     }
 
 }
 
 const handleSources = (time) => {
-    for (const shape of source.shapes) {
-      shape.move(new THREE.Vector3(0, 0, 2 / 1000))
+    for (const node of nodes) {
+      node.moveShapes(2 / 1000);
+      node.cleanUp()
       // object.position.x += 2 / 1000;
       // object.rotation.z = time / 1000;
       // object.position.y = 0.5 + 0.5 * Math.abs(Math.sin(time / 1000));

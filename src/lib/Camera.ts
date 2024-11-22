@@ -87,8 +87,12 @@ export class Orbit {
     if (this.camSpeed.y) {
       const direction = new THREE.Vector3(0, 0, 1);
       const quat = new THREE.Quaternion().setFromEuler(this.camera.rotation);
+      // console.log(quat);
       direction.applyQuaternion(quat);
       direction.y = 0;
+      // direction.z = direction.x
+      // direction.z = direction.z < 0.0001 ? 0.3 : direction.z;
+      // console.log(direction)
       this.orbit.target.addScaledVector(direction, this.camSpeed.y * delta);
       this.camera.position.addScaledVector(direction, this.camSpeed.y * delta);
     }

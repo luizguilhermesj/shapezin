@@ -1,11 +1,13 @@
 import * as THREE from "three";
 import { ShapeCircle } from "./ShapeCircle";
+import { ShapezObject } from "./ShapezObject";
+import type { PathNode } from "./PathNode";
 
-export class Source {
+export class Source extends ShapezObject {
   public object: THREE.Mesh<THREE.BoxGeometry, THREE.MeshBasicMaterial>;
-  public shapes: ShapeCircle[] = []
 
-  constructor(private scene: THREE.Scene, public position: THREE.Vector3) {
+  constructor(private scene: THREE.Scene, position: THREE.Vector3) {
+    super(position);
     this.object = new THREE.Mesh(
       new THREE.BoxGeometry(1, 1, 1),
       new THREE.MeshBasicMaterial({
@@ -16,15 +18,23 @@ export class Source {
     this.object.position.copy(position);
     this.object.name = "source";
 
+
     setInterval(this.generate.bind(this), 3000);
   }
 
   generate() {
-    const shape = new ShapeCircle(this.object.position)
-    this.shapes.push(shape)
-    
+    let path: PathNode;
+    for (let edge of this.getEdges()) {
+      const check = window.space.getObject(edge);
+      if (check) {
+        path = check;
+        break;
+      }
+    }
 
-    this.scene.add(shape.object)
-    
+    if (path) {
+      const shape = new ShapeCircle(this.object.position);
+      path.addShape(shape)
+    }
   }
 }

@@ -1,45 +1,19 @@
 import * as THREE from "three";
+import type { ShapezObject } from "./ShapezObject";
 
 export class Space {
   public objects: {
-    [key: string]: THREE.Object3D | THREE.Group;
+    [key: string]: ShapezObject;
   } = {};
 
-  constructor(private scene: THREE.Scene) {}
+  constructor(public scene: THREE.Scene) {
+    window.space = this
+  }
 
-  add(object: THREE.Mesh) {
-    if (
-      Math.abs(object.position.x % 1) == 0.5 &&
-      Math.abs(object.position.z % 1) == 0.5
-    ) {
-      this.objects[object.position.toArray().toString()] = object;
-    } else {
-      if (
-        Math.abs(object.position.x % 1) != 0.5 &&
-        Math.abs(object.position.z % 1) != 0.5
-      ) {
-        let temp = new THREE.Vector3();
-        temp.copy(object.position);
-        temp.x = this.nearest(temp.x);
-        temp.z = this.nearest(temp.z);
-        this.objects[temp.toArray().toString()] = object;
-        temp.x++;
-        this.objects[temp.toArray().toString()] = object;
-        temp.z++;
-        this.objects[temp.toArray().toString()] = object;
-        temp.x--;
-        this.objects[temp.toArray().toString()] = object;
-      }
-      //   if (false) {
-      //     let temp = new THREE.Vector3();
-      //     temp.copy(object.position);
-      //     temp.z = this.nearest(temp.z);
-      //     console.log(temp.z);
-      //     this.objects[temp.toArray().toString()] = object;
-      //     temp.z++;
-      //     console.log(temp.z);
-      //     this.objects[temp.toArray().toString()] = object;
-      //   }
+  add(shapezObject: ShapezObject) {
+    const object = shapezObject.object;
+    for (let pos of shapezObject.positions) {
+      this.objects[pos.toArray().toString()] = shapezObject;
     }
     this.scene.add(object);
   }
@@ -50,10 +24,5 @@ export class Space {
 
   getObject(vector: THREE.Vector3) {
     return this.objects[vector.toArray().toString()];
-  }
-
-  private nearest(n: number) {
-    let x = ((1 - (n % 1)) % 1) + n;
-    return n % 1 > 0.5 ? x + 0.5 : x - 0.5;
   }
 }
